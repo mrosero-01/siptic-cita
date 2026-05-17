@@ -16,6 +16,7 @@
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Estado</th>
+          <th>Acciones</th> 
         </tr>
       </thead>
       <tbody>
@@ -29,10 +30,20 @@
                 {{ specialty.status ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
+            <td>
+              <div class="actions-wrapper">
+                <button class="btn-edit" (click)="onEditSpecialty(specialty)">
+                  Editar
+                </button>
+                <button class="btn-delete" (click)="onDeleteSpecialty(specialty.id)">
+                  Eliminar
+                </button>
+              </div>
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="4" style="text-align: center; color: #8c8c8c; padding: 20px;">
+            <td colspan="5" class="empty-state">
               No hay especialidades registradas en el sistema.
             </td>
           </tr>
@@ -46,7 +57,7 @@
   <div class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
-        <h3>Nueva Especialidad</h3>
+        <h3>{{ selectedSpecialtyId() !== null ? 'Editar Especialidad' : 'Nueva Especialidad' }}</h3>
         <button class="btn-close" (click)="closeModal()">✕</button>
       </div>
       
@@ -64,7 +75,9 @@
 
         <div class="modal-actions">
           <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn-submit" [disabled]="specialtyForm.invalid">Guardar Registro</button>
+          <button type="submit" class="btn-submit" [disabled]="specialtyForm.invalid">
+            {{ selectedSpecialtyId() !== null ? 'Actualizar Cambios' : 'Guardar Registro' }}
+          </button>
         </div>
       </form>
     </div>

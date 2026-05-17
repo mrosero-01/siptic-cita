@@ -11,11 +11,11 @@
         <tr>
           <th>ID</th>
           <th>Nombre Completo</th>
-          <th>Tarjeta Prof.</th>
           <th>Email</th>
           <th>Teléfono</th>
           <th>Especialidad</th>
           <th>Estado</th>
+          <th>Acciones</th> 
         </tr>
       </thead>
       <tbody>
@@ -32,10 +32,20 @@
                 {{ doctor.status ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
+            <td>
+              <div class="actions-wrapper">
+                <button class="btn-edit" (click)="onEditDoctor(doctor)">
+                  Editar
+                </button>
+                <button class="btn-delete" (click)="onDeleteDoctor(doctor.id)">
+                  Eliminar
+                </button>
+              </div>
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" style="text-align: center; color: #8c8c8c; padding: 20px;">
+            <td colspan="8" class="empty-state">
               No hay médicos registrados en el sistema.
             </td>
           </tr>
@@ -49,7 +59,7 @@
   <div class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
-        <h3>Registrar Nuevo Médico</h3>
+        <h3>{{ selectedDoctorId() !== null ? 'Editar Médico' : 'Registrar Nuevo Médico' }}</h3>
         <button class="btn-close" (click)="closeModal()">✕</button>
       </div>
       
@@ -95,7 +105,9 @@
 
         <div class="modal-actions">
           <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn-submit" [disabled]="doctorForm.invalid">Guardar Registro</button>
+          <button type="submit" class="btn-submit" [disabled]="doctorForm.invalid">
+            {{ selectedDoctorId() !== null ? 'Actualizar Cambios' : 'Guardar Registro' }}
+          </button>
         </div>
       </form>
     </div>

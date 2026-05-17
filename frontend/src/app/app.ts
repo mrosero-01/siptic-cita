@@ -3,7 +3,7 @@ import { UpperCasePipe } from '@angular/common';
 import { SidebarComponent } from './components/sidebar/sidebar';
 import { AppointmentsComponent } from './components/appointments/appointments';
 import { PatientsComponent } from './components/patients/patients';
-import { DoctorsComponent } from './components/doctors/doctors'; // <-- 1. Importamos
+import { DoctorsComponent } from './components/doctors/doctors'; 
 import { SpecialtiesComponent } from './components/specialties/specialties';
 
 @Component({
@@ -13,7 +13,7 @@ import { SpecialtiesComponent } from './components/specialties/specialties';
     SidebarComponent, 
     AppointmentsComponent,
     PatientsComponent,
-    DoctorsComponent, // <-- 2. Registramos en los imports
+    DoctorsComponent, 
     SpecialtiesComponent,
     UpperCasePipe 
   ],
