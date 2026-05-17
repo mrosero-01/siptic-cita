@@ -1,7 +1,7 @@
 <div class="view-container">
   <div class="header">
     <h2>Gestión de Médicos</h2>
-    <button class="btn-add">+ Agregar Médico</button>
+    <button class="btn-add" (click)="openModal()">+ Agregar Médico</button>
   </div>
 
   <div class="table-card">
@@ -11,7 +11,7 @@
         <tr>
           <th>ID</th>
           <th>Nombre Completo</th>
-          <th>Cédula/Documento</th>
+          <th>Tarjeta Prof.</th>
           <th>Email</th>
           <th>Teléfono</th>
           <th>Especialidad</th>
@@ -22,11 +22,11 @@
         @for (doctor of doctors(); track doctor.id) {
           <tr>
             <td>#{{ doctor.id }}</td>
-            <td>{{ doctor.first_name }} {{ doctor.last_name }}</td>
-            <td>{{ doctor.n_document }}</td>
+            <td>Dr(a). {{ doctor.first_name }} {{ doctor.last_name }}</td>
+            <td>{{ doctor.license_number }}</td>
             <td>{{ doctor.email }}</td>
             <td>{{ doctor.phone }}</td>
-            <td>{{ doctor.specialty }}</td>
+            <td>{{ doctor.specialty_name || 'ID: ' + doctor.specialty }}</td>
             <td>
               <span class="status-badge" [class.active]="doctor.status" [class.inactive]="!doctor.status">
                 {{ doctor.status ? 'Activo' : 'Inactivo' }}
@@ -44,3 +44,60 @@
     </table>
   </div>
 </div>
+
+@if (isModalOpen()) {
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Médico</h3>
+        <button class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+      
+      <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label>Nombres</label>
+            <input type="text" formControlName="first_name" placeholder="Ej. Carlos">
+          </div>
+          
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" formControlName="last_name" placeholder="Ej. Mendoza">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Especialidad Médica</label>
+            <select formControlName="specialty">
+              <option value="" disabled selected>Seleccione la especialidad...</option>
+              @for (e of specialties(); track e.id) {
+                <option [value]="e.id">{{ e.name }}</option>
+              }
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Tarjeta Profesional / Reg.</label>
+            <input type="text" formControlName="license_number" placeholder="No. Registro médico">
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" formControlName="phone" placeholder="Ej. 315...">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Correo Electrónico</label>
+            <input type="email" formControlName="email" placeholder="doctor@clinica.com">
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-submit" [disabled]="doctorForm.invalid">Guardar Registro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

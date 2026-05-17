@@ -1,8 +1,8 @@
 <div class="view-container">
   <div class="header">
     <h2>Gestión de Especialidades</h2>
-    <button class="btn-add">
-       +Agregar Especialidad
+    <button class="btn-add" (click)="openModal()">
+       + Agregar Especialidad
     </button>
   </div>
 
@@ -19,23 +19,54 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>#1</td>
-          <td>Cardiología</td>
-          <td>Especialidad en enfermedades del corazón y del sistema circulatorio.</td>
-          <td>
-            <span class="status-badge active">Activo</span>
-          </td>
-        </tr>
-        <tr>
-          <td>#2</td>
-          <td>Pediatría</td>
-          <td>Atención médica de bebés, niños y adolescentes.</td>
-          <td>
-            <span class="status-badge inactive">Inactivo</span>
-          </td>
-        </tr>
+        @for (specialty of specialtiesSignal(); track specialty.id) {
+          <tr>
+            <td>#{{ specialty.id }}</td>
+            <td>{{ specialty.name }}</td>
+            <td>{{ specialty.description }}</td>
+            <td>
+              <span class="status-badge" [class.active]="specialty.status" [class.inactive]="!specialty.status">
+                {{ specialty.status ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" style="text-align: center; color: #8c8c8c; padding: 20px;">
+              No hay especialidades registradas en el sistema.
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
 </div>
+
+@if (isModalOpen()) {
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Nueva Especialidad</h3>
+        <button class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+      
+      <form [formGroup]="specialtyForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Nombre de la Especialidad</label>
+            <input type="text" formControlName="name" placeholder="Ej. Cardiología, Pediatría...">
+          </div>
+          <div class="form-group full-width">
+            <label>Descripción</label>
+            <textarea formControlName="description" rows="4" placeholder="Escribe una breve descripción del área médica..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-submit" [disabled]="specialtyForm.invalid">Guardar Registro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

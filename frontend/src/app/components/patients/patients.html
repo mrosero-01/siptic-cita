@@ -1,8 +1,7 @@
-
 <div class="view-container">
   <div class="header">
     <h2>Gestión de Pacientes</h2>
-    <button class="btn-add">+ Agregar Paciente</button>
+    <button class="btn-add" (click)="openModal()">+ Agregar Paciente</button>
   </div>
 
   <div class="table-card">
@@ -14,7 +13,7 @@
           <th>Nombre</th>
           <th>Tipo identidad</th>
           <th>Número identidad</th>
-          <th>Télefono</th>
+          <th>Teléfono</th>
           <th>Estado</th>
         </tr>
       </thead>
@@ -27,9 +26,9 @@
             <td>{{ patient.n_document }}</td>
             <td>{{ patient.phone}}</td>
             <td>
-            <span class="status-badge" [class.active]="patient.status" [class.inactive]="!patient.status">
+              <span class="status-badge" [class.active]="patient.status" [class.inactive]="!patient.status">
                 {{ patient.status ? 'Activo' : 'Inactivo' }}
-            </span>
+              </span>
             </td>
           </tr>
         } @empty {
@@ -43,3 +42,56 @@
     </table>
   </div>
 </div>
+
+@if (isModalOpen()) {
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Nuevo Paciente</h3>
+        <button class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+      
+      <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombres</label>
+            <input type="text" formControlName="first_name" placeholder="Ej. Sara">
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" formControlName="last_name" placeholder="Ej. Rosas">
+          </div>
+          <div class="form-group">
+            <label>Tipo Doc.</label>
+            <select formControlName="document_type">
+              <option value="CC">Cédula de Ciudadanía</option>
+              <option value="TI">Tarjeta de Identidad</option>
+              <option value="CE">Cédula de Extranjería</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Documento</label>
+            <input type="text" formControlName="n_document" placeholder="Número de identidad">
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" formControlName="phone" placeholder="Número telefónico">
+          </div>
+          <div class="form-group">
+            <label>Fecha Nacimiento</label>
+            <input type="date" formControlName="birth_date">
+          </div>
+          <div class="form-group full-width">
+            <label>Observaciones o Comentarios</label>
+            <textarea formControlName="comments" rows="3" placeholder="Detalles médicos..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-submit" [disabled]="patientForm.invalid">Guardar Registro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

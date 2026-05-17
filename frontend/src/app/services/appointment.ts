@@ -13,7 +13,7 @@ export interface Appointment {
   date: string;        
   start_time: string;  
   description: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' |'RESCHEDULED'| 'ATTENDED' | 'NO_SHOW' | string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'RESCHEDULED' | 'ATTENDED' | 'NO_SHOW' | string;
   created_by: number | null;
   created_at: string;
   updated_at: string;
@@ -28,10 +28,22 @@ export class AppointmentService {
 
   appointmentsSignal = signal<Appointment[]>([]);
 
+  // Listar citas
   getAppointments(): void {
     this.http.get<Appointment[]>(this.apiUrl).subscribe({
       next: (data) => this.appointmentsSignal.set(data),
       error: (err) => console.error('Error de conexión:', err)
+    });
+  }
+
+  // Crear cita nueva
+  createAppointment(appointment: Partial<Appointment>): void {
+    this.http.post<Appointment>(this.apiUrl, appointment).subscribe({
+      next: (newAppointment) => {
+        // Añade la nueva cita al array de forma reactiva de una vez
+        this.appointmentsSignal.update(appointments => [...appointments, newAppointment]);
+      },
+      error: (err) => console.error('Error al guardar la cita en Django:', err)
     });
   }
 }
