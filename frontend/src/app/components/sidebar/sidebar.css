@@ -2,7 +2,7 @@
   width: 280px;
   height: 100vh;
   background-color: #ffffff;
-  box-shadow: 6px 0 32px rgba(15, 23, 42, 0.04), 1px 0 0 rgba(15, 23, 42, 0.05);
+  box-shadow: 4px 0 30px rgba(148, 163, 184, 0.08), 1px 0 0 rgba(226, 232, 240, 0.8);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -13,15 +13,15 @@ nav {
   display: flex;
   flex-direction: column;
   padding: 40px 16px;
-  gap: 8px;
+  gap: 10px;
 }
 
 button {
   background: none;
-  border: none;
+  border: 1px solid transparent; /* Reservamos el espacio del borde para que no salte el texto */
   text-align: left;
-  padding: 14px 20px;
-  font-size: 1.05rem;
+  padding: 13px 19px; /* Ajustamos 1px por el borde para mantener el tamaño idéntico */
+  font-size: 1rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -30,25 +30,29 @@ button {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 14px;
-  border-left: 4px solid transparent;
+  gap: 12px;
 }
 
+/* Hover con borde negro/oscuro sutil */
 button:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
-  padding-left: 24px;
-  border-left-color: #cbd5e1;
-}
-
-button.active {
   background-color: #f1f5f9;
   color: #0f172a;
-  border-left-color: #0f172a;
   padding-left: 24px;
+  border-color: rgba(15, 23, 42, 0.15); /* Negro sutil difuminado */
+}
+
+/* Pestaña Activa (Mantiene su estilo limpio de píldora flotante) */
+button.active {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  padding-left: 24px;
+  font-weight: 700;
+  border-radius: 9999px;
+  border-color: transparent; /* Quitamos el borde en el estado activo */
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15); 
 }
 
 button:focus-visible {
-  outline: 2px solid #0f172a;
+  outline: 2px solid #0284c7;
   outline-offset: -2px;
 }

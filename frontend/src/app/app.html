@@ -11,6 +11,12 @@
       @case ('pacientes') {
         <app-patients></app-patients>
       }
+      @case ('medicos') {
+        <app-doctors></app-doctors>
+      }
+      @case ('especialidades') {
+        <app-specialties></app-specialties>
+      }
       @default {
         <div style="padding: 40px; color: #495057; font-family: sans-serif;">
           <h2>Vista de {{ currentView() | uppercase }}</h2>
