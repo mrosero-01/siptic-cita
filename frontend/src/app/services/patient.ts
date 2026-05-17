@@ -25,10 +25,22 @@ export class PatientsService {
 
   patientsSignal = signal<Patient[]>([]);
 
+  // Listar pacientes
   getPatients(): void {
     this.http.get<Patient[]>(this.apiUrl).subscribe({
       next: (data) => this.patientsSignal.set(data),
       error: (err) => console.error('Error de conexión:', err)
+    });
+  }
+
+  // Agregar paciente nuevo
+  createPatient(patient: Partial<Patient>): void {
+    this.http.post<Patient>(this.apiUrl, patient).subscribe({
+      next: (newPatient) => {
+        // Añade el nuevo paciente al array actual de forma reactiva
+        this.patientsSignal.update(patients => [...patients, newPatient]);
+      },
+      error: (err) => console.error('Error al guardar el paciente en Django:', err)
     });
   }
 }

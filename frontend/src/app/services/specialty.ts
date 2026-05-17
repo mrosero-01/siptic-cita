@@ -20,10 +20,22 @@ export class SpecialtiesService {
 
   specialtiesSignal = signal<Specialty[]>([]);
 
+  // Listar especialidades
   getSpecialties(): void {
     this.http.get<Specialty[]>(this.apiUrl).subscribe({
       next: (data) => this.specialtiesSignal.set(data),
       error: (err) => console.error('Error de conexión:', err)
+    });
+  }
+
+  // Agregar especialidad nueva
+  createSpecialty(specialty: Partial<Specialty>): void {
+    this.http.post<Specialty>(this.apiUrl, specialty).subscribe({
+      next: (newSpecialty) => {
+        // Inserta la nueva especialidad al array del Signal de forma reactiva
+        this.specialtiesSignal.update(specialties => [...specialties, newSpecialty]);
+      },
+      error: (err) => console.error('Error al guardar la especialidad en Django:', err)
     });
   }
 }
