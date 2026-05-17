@@ -1,0 +1,23 @@
+<div style="display: flex; width: 100vw; height: 100vh; overflow: hidden; font-family: system-ui, -apple-system, sans-serif;">
+  
+  <app-sidebar (onMenuSelect)="changeView($event)"></app-sidebar>
+
+  <div style="flex: 1; height: 100vh; overflow-y: auto; background-color: #ffffff;">
+    
+    @switch (currentView()) {
+      @case ('citas') {
+        <app-appointments></app-appointments>
+      }
+      @case ('pacientes') {
+        <app-patients></app-patients>
+      }
+      @default {
+        <div style="padding: 40px; color: #495057; font-family: sans-serif;">
+          <h2>Vista de {{ currentView() | uppercase }}</h2>
+          <p style="color: #7f8c8d;">Esta pestaña está lista para ser programada de forma independiente.</p>
+        </div>
+      }
+    }
+
+  </div>
+</div>
