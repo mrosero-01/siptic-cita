@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-// Interfaz basada en el serializer de django
+
 export interface Specialty {
   id: number;
   name: string;
@@ -20,7 +20,7 @@ export class SpecialtiesService {
 
   specialtiesSignal = signal<Specialty[]>([]);
 
-  // Listar especialidades
+  
   getSpecialties(): void {
     this.http.get<Specialty[]>(this.apiUrl).subscribe({
       next: (data) => this.specialtiesSignal.set(data),
@@ -28,14 +28,41 @@ export class SpecialtiesService {
     });
   }
 
-  // Agregar especialidad nueva
+  
   createSpecialty(specialty: Partial<Specialty>): void {
     this.http.post<Specialty>(this.apiUrl, specialty).subscribe({
       next: (newSpecialty) => {
-        // Inserta la nueva especialidad al array del Signal de forma reactiva
+        
         this.specialtiesSignal.update(specialties => [...specialties, newSpecialty]);
       },
       error: (err) => console.error('Error al guardar la especialidad en Django:', err)
+    });
+  }
+
+  
+  deleteSpecialty(id: number): void {
+    this.http.delete(`${this.apiUrl}${id}/`).subscribe({
+      next: ()=> {
+        this.specialtiesSignal.update(specialties =>
+          specialties.filter(specialty => specialty.id !== id)
+        );
+        console.log( `Especialidad #${id} eliminada correctamnte.`);
+      },
+      error: (err) => console.error('Error al eliminar la especialidad en Django', err)
+    });
+
+  }
+
+  
+  updateSpecialty(id: number, specialtyData: Partial<any>): void {
+    this.http.put<any>(`${this.apiUrl}${id}/`, specialtyData).subscribe({
+      next: (updatedSpecialty) => {
+        this.specialtiesSignal.update(specialties =>
+          specialties.map(s => s.id === id ? updatedSpecialty : s)
+        );
+        console.log(`Especialidad #${id} actualizada con éxito.`);
+      },
+      error: (err) => console.error('Error al actualizar la especialidad en Django:', err)
     });
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-// Interfaz basada en el serializer de django
+
 export interface Patient {
   id: number;
   first_name: string;
@@ -25,7 +25,7 @@ export class PatientsService {
 
   patientsSignal = signal<Patient[]>([]);
 
-  // Listar pacientes
+  
   getPatients(): void {
     this.http.get<Patient[]>(this.apiUrl).subscribe({
       next: (data) => this.patientsSignal.set(data),
@@ -33,14 +33,38 @@ export class PatientsService {
     });
   }
 
-  // Agregar paciente nuevo
+  
   createPatient(patient: Partial<Patient>): void {
     this.http.post<Patient>(this.apiUrl, patient).subscribe({
       next: (newPatient) => {
-        // Añade el nuevo paciente al array actual de forma reactiva
+        
         this.patientsSignal.update(patients => [...patients, newPatient]);
       },
       error: (err) => console.error('Error al guardar el paciente en Django:', err)
     });
   }
+
+  deletePatient(id: number): void {
+    this.http.delete(`${this.apiUrl}${id}/`).subscribe({
+      next: ()=>{
+        this.patientsSignal.update(patients =>
+          patients.filter(patient => patient.id !== id)
+        );
+        console.log(`Paciente ${id} eliminado correctamnte.`)
+      },
+      error: (err) => console.error('Error al eliminar el paciente', err)
+    });
+  }
+
+  updatePatient(id: number, patientData: Partial<Patient>): void {
+  this.http.put<Patient>(`${this.apiUrl}${id}/`, patientData).subscribe({
+    next: (updatedPatient) => { 
+      this.patientsSignal.update(patients =>
+        patients.map(p => p.id === id ? updatedPatient : p) 
+      );
+      console.log(`Paciente #${id} actualizado con éxito.`);
+    },
+    error: (err) => console.error('Error actualizando el paciente', err)
+  });
+}
 }

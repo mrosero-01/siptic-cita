@@ -14,11 +14,11 @@ export class SpecialtiesComponent implements OnInit {
   private specialtiesService = inject(SpecialtiesService);
   private fb = inject(FormBuilder);
 
-  // Exponemos el Signal del servicio para la tabla
   specialtiesSignal = this.specialtiesService.specialtiesSignal;
 
-  // Control del modal y formulario reactivo
+ 
   public isModalOpen = signal<boolean>(false);
+  public selectedSpecialtyId = signal<number | null>(null); 
   public specialtyForm!: FormGroup;
 
   ngOnInit(): void {
@@ -26,29 +26,54 @@ export class SpecialtiesComponent implements OnInit {
     this.initForm();
   }
 
-  // Mapeo directo con tu SpecialtySerializer de Django
   private initForm(): void {
     this.specialtyForm = this.fb.group({
       name: ['', [Validators.required]],
       description: ['', [Validators.required]],
-      status: [true] // Activo por defecto
+      status: [true]
     });
   }
 
-  // Métodos para interactuar con la vista
   public openModal(): void {
+
     this.specialtyForm.reset({ status: true });
+    this.selectedSpecialtyId.set(null); 
     this.isModalOpen.set(true);
   }
 
   public closeModal(): void {
     this.isModalOpen.set(false);
+    this.selectedSpecialtyId.set(null); 
+  }
+
+  public onEditSpecialty(specialty: any): void {
+    this.selectedSpecialtyId.set(specialty.id);
+    this.specialtyForm.patchValue({
+      name: specialty.name,
+      description: specialty.description,
+      status: specialty.status
+    });
+    this.isModalOpen.set(true);
   }
 
   public onSubmit(): void {
     if (this.specialtyForm.valid) {
-      this.specialtiesService.createSpecialty(this.specialtyForm.value);
+      const idParaEditar = this.selectedSpecialtyId();
+
+      if (idParaEditar !== null) {
+        this.specialtiesService.updateSpecialty(idParaEditar, this.specialtyForm.value);
+      } else {
+        this.specialtiesService.createSpecialty(this.specialtyForm.value);
+      }
+
       this.closeModal();
+    }
+  }
+
+  public onDeleteSpecialty(id: number): void {
+    const confirmacion = confirm('¿Estás seguro de que deseas eliminar esta especialidad?');
+    if (confirmacion) {
+      this.specialtiesService.deleteSpecialty(id);
     }
   }
 }

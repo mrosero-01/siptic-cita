@@ -16,6 +16,7 @@
           <th>Fecha</th>
           <th>Hora</th>
           <th>Estado</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -38,10 +39,20 @@
                 {{ cita.status }}
               </span>
             </td>
+            <td>
+              <div class="actions-wrapper">
+                <button class="btn-edit" (click)="onEditAppointment(cita)">
+                  Editar
+                </button>
+                <button class="btn-delete" (click)="onDeleteAppointment(cita.id)">
+                  Eliminar
+                </button>
+              </div>
+            </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" style="text-align: center; color: #8c8c8c; padding: 20px;">
+            <td colspan="8" class="empty-state">
               No hay citas registradas en el sistema.
             </td>
           </tr>
@@ -55,7 +66,7 @@
   <div class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
-        <h3>Agendar Nueva Cita</h3>
+        <h3>{{ selectedAppointmentId() !== null ? 'Modificar Cita Médica' : 'Agendar Nueva Cita' }}</h3>
         <button class="btn-close" (click)="closeModal()">✕</button>
       </div>
       
@@ -102,6 +113,20 @@
             <input type="time" formControlName="start_time">
           </div>
 
+          @if (selectedAppointmentId() !== null) {
+            <div class="form-group full-width">
+              <label>Estado de la Cita</label>
+              <select formControlName="status">
+                <option value="PENDING">Pendiente (PENDING)</option>
+                <option value="CONFIRMED">Confirmada (CONFIRMED)</option>
+                <option value="CANCELLED">Cancelada (CANCELLED)</option>
+                <option value="RESCHEDULED">Reagendada (RESCHEDULED)</option>
+                <option value="ATTENDED">Atendida (ATTENDED)</option>
+                <option value="NO_SHOW">No Asistió (NO_SHOW)</option>
+              </select>
+            </div>
+          }
+
           <div class="form-group full-width">
             <label>Motivo de la Cita</label>
             <textarea formControlName="description" rows="3" placeholder="Ej. Control general, lectura de exámenes..."></textarea>
@@ -110,7 +135,9 @@
 
         <div class="modal-actions">
           <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn-submit" [disabled]="appointmentForm.invalid">Agendar Cita</button>
+          <button type="submit" class="btn-submit" [disabled]="appointmentForm.invalid">
+            {{ selectedAppointmentId() !== null ? 'Actualizar Cita' : 'Agendar Cita' }}
+          </button>
         </div>
       </form>
     </div>

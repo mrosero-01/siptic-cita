@@ -1,11 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AppointmentService } from '../../services/appointment';
-// Inyectamos los demás servicios para alimentar los selects del modal
+import { AppointmentService, Appointment } from '../../services/appointment'; 
 import { PatientsService } from '../../services/patient';
 import { SpecialtiesService } from '../../services/specialty';
-import { DoctorService } from '../../services/doctor'; // Ajusta el nombre según tu archivo de médicos
+import { DoctorService } from '../../services/doctor'; 
 
 @Component({
   selector: 'app-appointments',
@@ -21,18 +20,18 @@ export class AppointmentsComponent implements OnInit {
   private doctorsService = inject(DoctorService);
   private fb = inject(FormBuilder);
 
-  // Listados principales que vienen de los Signals de cada servicio
+  
   public appointments = this.appointmentService.appointmentsSignal;
   public patients = this.patientsService.patientsSignal;
   public specialties = this.specialtiesService.specialtiesSignal;
-  public doctors = this.doctorsService.doctorsSignal; // Ajusta según manejes el signal de médicos
+  public doctors = this.doctorsService.doctorsSignal; 
 
-  // Controles de la interfaz reactiva
+  
   public isModalOpen = signal<boolean>(false);
+  public selectedAppointmentId = signal<number | null>(null); 
   public appointmentForm!: FormGroup;
 
   ngOnInit(): void {
-    // Cargamos la tabla principal de citas
     this.appointmentService.getAppointments();
     this.initForm();
   }
@@ -45,28 +44,72 @@ export class AppointmentsComponent implements OnInit {
       date: ['', [Validators.required]],
       start_time: ['', [Validators.required]],
       description: ['', [Validators.required]],
-      status: ['PENDING', [Validators.required]] // Estado inicial por defecto
+      status: ['PENDING', [Validators.required]] 
     });
   }
 
   public openModal(): void {
-    // Disparamos la carga de los datos necesarios para llenar los dropdowns del modal
+    
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
-    this.doctorsService.getDoctors(); // Asegúrate de tener este método en tu servicio de médicos
+    this.doctorsService.getDoctors(); 
 
-    this.appointmentForm.reset({ status: 'PENDING' });
+    
+    this.appointmentForm.reset({ status: 'PENDING', patient: '', specialty: '', doctor: '' });
+    this.selectedAppointmentId.set(null); 
     this.isModalOpen.set(true);
   }
 
   public closeModal(): void {
     this.isModalOpen.set(false);
+    this.selectedAppointmentId.set(null); 
   }
 
+  
+  public onEditAppointment(appointment: Appointment): void {
+    this.selectedAppointmentId.set(appointment.id); 
+
+    
+    this.patientsService.getPatients();
+    this.specialtiesService.getSpecialties();
+    this.doctorsService.getDoctors();
+
+    
+    this.appointmentForm.patchValue({
+      patient: appointment.patient,         
+      specialty: appointment.specialty,     
+      doctor: appointment.doctor,           
+      date: appointment.date,               
+      start_time: appointment.start_time,   
+      description: appointment.description,
+      status: appointment.status            
+    });
+
+    this.isModalOpen.set(true);
+  }
+
+  
   public onSubmit(): void {
     if (this.appointmentForm.valid) {
-      this.appointmentService.createAppointment(this.appointmentForm.value);
+      const idParaEditar = this.selectedAppointmentId();
+
+      if (idParaEditar !== null) {
+        
+        this.appointmentService.updateAppointment(idParaEditar, this.appointmentForm.value);
+      } else {
+        
+        this.appointmentService.createAppointment(this.appointmentForm.value);
+      }
+      
       this.closeModal();
+    }
+  }
+
+  
+  public onDeleteAppointment(id: number): void {
+    const confirmacion = confirm('¿Estás seguro de borrar la cita?');
+    if (confirmacion) {
+      this.appointmentService.deleteAppointment(id);
     }
   }
 }
