@@ -1,0 +1,41 @@
+
+<div class="view-container">
+  <div class="header">
+    <h2>Gestión de Pacientes</h2>
+    <button class="btn-add">+ Agregar Cita</button>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de Pacientes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Tipo identidad</th>
+          <th>Número identidad</th>
+          <th>Télefono</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (patient of patients(); track patient.id) {
+          <tr>
+            <td>#{{ patient.id }}</td>
+            <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+            <td>{{ patient.document_type}}</td>
+            <td>{{ patient.n_document }}</td>
+            <td>{{ patient.phone}}</td>
+            <td>{{ patient.status }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; color: #8c8c8c; padding: 20px;">
+              No hay pacientes registrados en el sistema.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

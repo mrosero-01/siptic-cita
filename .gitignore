@@ -307,5 +307,10 @@ dist
 
 # SvelteKit build / generate output
 .svelte-kit
+### Angular Specific ###
+.angular/
+.cache/
+/dist/
+
 
 # End of https://www.toptal.com/developers/gitignore/api/django,node

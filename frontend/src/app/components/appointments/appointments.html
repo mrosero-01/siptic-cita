@@ -1,0 +1,44 @@
+<div class="view-container">
+  <div class="header">
+    <h2>Gestión de Citas</h2>
+    <button class="btn-add">+ Agregar Cita</button>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de Citas</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Paciente</th>
+          <th>Médico</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cita of appointments(); track cita.id) {
+          <tr>
+            <td>#{{ cita.id }}</td>
+            <td>{{ cita.patient_name || 'ID: ' + cita.patient }}</td>
+            <td>{{ cita.doctor_name || 'ID: ' + cita.doctor }}</td>
+            <td>{{ cita.date }}</td>
+            <td>{{ cita.start_time }}</td>
+            <td>
+              <span class="status-badge" [class.pending]="cita.status === 'PENDING'">
+                {{ cita.status }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" style="text-align: center; color: #8c8c8c; padding: 20px;">
+              No hay citas registradas en el sistema.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

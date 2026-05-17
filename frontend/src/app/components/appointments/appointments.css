@@ -1,0 +1,115 @@
+.view-container { 
+  padding: 40px; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Usamos una fuente más limpia */
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 32px; 
+}
+
+.header h2 { 
+  margin: 0; 
+  font-size: 1.75rem; 
+  font-weight: 800;
+  color: #0f172a; 
+  letter-spacing: -0.5px;
+}
+
+.btn-add { 
+  background-color: #0f172a; 
+  color: #ffffff; 
+  border: none; 
+  padding: 12px 20px; 
+  border-radius: 8px; /* Un poco más cuadrado y elegante */
+  cursor: pointer; 
+  font-size: 1rem;
+  font-weight: 600; 
+  transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px); /* Efecto de flotación al pasar el mouse */
+}
+
+.table-card { 
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0; 
+  border-radius: 12px; 
+  padding: 24px; 
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02), 0 4px 6px -2px rgba(0,0,0,0.01); 
+}
+
+.table-card h3 { 
+  margin-top: 0; 
+  margin-bottom: 24px; 
+  font-size: 1.1rem; 
+  font-weight: 600;
+  color: #495057; 
+}
+
+table { 
+  width: 100%; 
+  border-collapse: separate; 
+  border-spacing: 0;
+  text-align: left; 
+  border: 2px solid #e2e8f0; /* Suavizamos el borde exterior */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th { 
+  padding: 16px 20px; /* ¡Aumentamos el espacio interior! */
+  background-color: #f1f5f9; /* Un gris más oscuro y nítido para contraste */
+  border-bottom: 2px solid #e2e8f0; 
+  border-right: 1px solid #e2e8f0; /* Suavizamos el separador vertical */
+  color: #0f172a; /* Texto negro profundo */
+  font-size: 0.9rem; 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+th:last-child {
+  border-right: none;
+}
+
+td { 
+  padding: 16px 20px; /* ¡Aumentamos el espacio interior aquí también! */
+  border-bottom: 1px solid #e2e8f0; 
+  border-right: 1px solid #e2e8f0; /* Separadores de columna más suaves */
+  color: #334155; 
+  font-size: 1rem; 
+  transition: background-color 0.2s ease;
+}
+
+td:last-child {
+  border-right: none;
+}
+
+tr:hover td {
+  background-color: #f8fafc; /* Color de fondo muy sutil al pasar el mouse */
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.status-badge { 
+  padding: 6px 12px; 
+  border-radius: 6px; 
+  font-size: 0.85rem; 
+  font-weight: 600; 
+  display: inline-block;
+  letter-spacing: 0.025em;
+}
+
+.status-badge.pending { 
+  background-color: #fef3c7; /* Tono ámbar suave */
+  color: #d97706; /* Texto naranja oscuro nítido */
+}
