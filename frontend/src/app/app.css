@@ -1,0 +1,32 @@
+.main-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.content-area {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f8fafc; /* El mismo gris sutil que le dimos a las tablas para que unifique perfecto */
+}
+
+/* Estilos para el estado por defecto o errores */
+.fallback-view {
+  padding: 40px;
+  color: #475569;
+}
+
+.fallback-view h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.fallback-view p {
+  color: #64748b;
+  font-size: 1rem;
+}

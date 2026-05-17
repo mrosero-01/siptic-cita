@@ -1,7 +1,19 @@
 <div class="sidebar">
   <nav>
-    <button (click)="selectMenu('medicos')">Médicos</button>
-    <button (click)="selectMenu('pacientes')">Pacientes</button>
-    <button (click)="selectMenu('citas')">Citas</button>
+    <button (click)="selectMenu('medicos')" [class.active]="currentView === 'medicos'">
+      Médicos
+    </button>
+    
+    <button (click)="selectMenu('pacientes')" [class.active]="currentView === 'pacientes'">
+      Pacientes
+    </button>
+    
+    <button (click)="selectMenu('citas')" [class.active]="currentView === 'citas'">
+      Citas
+    </button>
+
+    <button (click)="selectMenu('especialidades')" [class.active]="currentView === 'especialidades'">
+      Especialidades
+    </button>
   </nav>
 </div>

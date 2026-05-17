@@ -1,16 +1,20 @@
-import { Component, output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [],
-  templateUrl: './sidebar.html', // <-- Apunta al archivo HTML externo
-  styleUrl: './sidebar.css'       // <-- Apunta al archivo CSS externo
+  templateUrl: './sidebar.html',
+  styleUrl: './sidebar.css'
 })
 export class SidebarComponent {
-  onMenuSelect = output<string>();
+  
+  @Input() currentView: string = 'citas'; 
+  
+  @Output() onMenuSelect = new EventEmitter<string>();
 
-  selectMenu(menu: string) {
-    this.onMenuSelect.emit(menu);
+  selectMenu(view: string) {
+    this.currentView = view; 
+    this.onMenuSelect.emit(view);
   }
 }

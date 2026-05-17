@@ -2,7 +2,7 @@
 <div class="view-container">
   <div class="header">
     <h2>Gestión de Pacientes</h2>
-    <button class="btn-add">+ Agregar Cita</button>
+    <button class="btn-add">+ Agregar Paciente</button>
   </div>
 
   <div class="table-card">
@@ -26,7 +26,11 @@
             <td>{{ patient.document_type}}</td>
             <td>{{ patient.n_document }}</td>
             <td>{{ patient.phone}}</td>
-            <td>{{ patient.status }}</td>
+            <td>
+            <span class="status-badge" [class.active]="patient.status" [class.inactive]="!patient.status">
+                {{ patient.status ? 'Activo' : 'Inactivo' }}
+            </span>
+            </td>
           </tr>
         } @empty {
           <tr>
