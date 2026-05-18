@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SpecialtiesService, Specialty } from '../../services/specialty';
-import { invalidFormAlert } from '../../services/api-alert';
+import { invalidFormAlert, showConfirm } from '../../services/api-alert';
 
 @Component({
   selector: 'app-specialties',
@@ -82,9 +82,6 @@ export class SpecialtiesComponent implements OnInit {
   }
 
   public onDeleteSpecialty(id: number): void {
-    const confirmacion = confirm('¿Estás seguro de que deseas eliminar esta especialidad?');
-    if (confirmacion) {
-      this.specialtiesService.deleteSpecialty(id);
-    }
+    showConfirm('¿Estás seguro de que deseas eliminar esta especialidad?', () => this.specialtiesService.deleteSpecialty(id));
   }
 }

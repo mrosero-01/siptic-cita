@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../services/doctor'; 
 import { SpecialtiesService } from '../../services/specialty'; 
-import { invalidFormAlert } from '../../services/api-alert';
+import { invalidFormAlert, showConfirm } from '../../services/api-alert';
 
 @Component({
   selector: 'app-doctors',
@@ -99,10 +99,6 @@ export class DoctorsComponent implements OnInit {
   }
 
   public onDeleteDoctor(id: number): void {
-    const confirmacion = confirm('¿Estás seguro de querer borrar al doctor?');
-
-    if (confirmacion) {
-      this.doctorService.deleteDoctor(id);
-    }
+    showConfirm('¿Estás seguro de querer borrar al doctor?', () => this.doctorService.deleteDoctor(id));
   }
 }
