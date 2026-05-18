@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../services/doctor'; 
 import { SpecialtiesService } from '../../services/specialty'; 
+import { invalidFormAlert } from '../../services/api-alert';
 
 @Component({
   selector: 'app-doctors',
@@ -16,11 +17,8 @@ export class DoctorsComponent implements OnInit {
   private specialtiesService = inject(SpecialtiesService);
   private fb = inject(FormBuilder);
   
-  
   public doctors = this.doctorService.doctorsSignal;
   public specialties = this.specialtiesService.specialtiesSignal;
-
-  
   public isModalOpen = signal<boolean>(false);
   public selectedDoctorId = signal<number | null>(null); 
   public doctorForm!: FormGroup;
@@ -43,9 +41,7 @@ export class DoctorsComponent implements OnInit {
   }
 
   public openModal(): void {
-    
     this.specialtiesService.getSpecialties();
-    
     this.doctorForm.reset({ status: true, specialty: '' });
     this.selectedDoctorId.set(null); 
     this.isModalOpen.set(true);
@@ -56,12 +52,9 @@ export class DoctorsComponent implements OnInit {
     this.selectedDoctorId.set(null); 
   }
 
-  
   public onEditDoctor(doctor: Doctor): void {
     this.selectedDoctorId.set(doctor.id); 
     this.specialtiesService.getSpecialties(); 
-
-    
     this.doctorForm.patchValue({
       first_name: doctor.first_name,
       last_name: doctor.last_name,
@@ -71,29 +64,42 @@ export class DoctorsComponent implements OnInit {
       email: doctor.email,
       status: doctor.status
     });
-
     this.isModalOpen.set(true);
   }
 
-  
-  public onSubmit(): void {
-    if (this.doctorForm.valid) {
-      const idParaEditar = this.selectedDoctorId();
+  private getInvalidFields(): string[] {
+    const labels: Record<string, string> = {
+      first_name: 'Nombres',
+      last_name: 'Apellidos',
+      specialty: 'Especialidad médica',
+      n_document: 'Documento',
+      phone: 'Teléfono',
+      email: 'Correo electrónico'
+    };
 
-      if (idParaEditar !== null) {
-        
-        this.doctorService.updateDoctor(idParaEditar, this.doctorForm.value);
-      } else {
-        
-        this.doctorService.createDoctor(this.doctorForm.value);
-      }
-      
-      this.closeModal();
+    return Object.keys(this.doctorForm.controls)
+      .filter(controlName => this.doctorForm.get(controlName)?.invalid)
+      .map(controlName => labels[controlName] || controlName);
+  }
+
+  public onSubmit(): void {
+    if (this.doctorForm.invalid) {
+      this.doctorForm.markAllAsTouched();
+      invalidFormAlert(this.getInvalidFields());
+      return;
+    }
+
+    const idParaEditar = this.selectedDoctorId();
+
+    if (idParaEditar !== null) {
+      this.doctorService.updateDoctor(idParaEditar, this.doctorForm.value, () => this.closeModal());
+    } else {
+      this.doctorService.createDoctor(this.doctorForm.value, () => this.closeModal());
     }
   }
 
   public onDeleteDoctor(id: number): void {
-    const confirmacion = confirm(`¿Estás seguro de querer borrar al doctor?`);
+    const confirmacion = confirm('¿Estás seguro de querer borrar al doctor?');
 
     if (confirmacion) {
       this.doctorService.deleteDoctor(id);

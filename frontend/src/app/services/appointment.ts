@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { showError, showSuccess } from './api-alert';
 
 export interface Appointment {
   id: number;
@@ -28,50 +28,46 @@ export class AppointmentService {
 
   appointmentsSignal = signal<Appointment[]>([]);
 
-  
   getAppointments(): void {
     this.http.get<Appointment[]>(this.apiUrl).subscribe({
       next: (data) => this.appointmentsSignal.set(data),
-      error: (err) => console.error('Error de conexión:', err)
+      error: (err) => showError('No se pudieron cargar las citas.', err)
     });
   }
 
-  
-  createAppointment(appointment: Partial<Appointment>): void {
+  createAppointment(appointment: Partial<Appointment>, onSuccess?: () => void): void {
     this.http.post<Appointment>(this.apiUrl, appointment).subscribe({
       next: (newAppointment) => {
-        
         this.appointmentsSignal.update(appointments => [...appointments, newAppointment]);
+        showSuccess('Cita creada correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al guardar la cita en Django:', err)
+      error: (err) => showError('No se pudo crear la cita.', err)
     });
   }
 
-  
   deleteAppointment(id: number): void {
     this.http.delete(`${this.apiUrl}${id}/`).subscribe({
       next: () => {
         this.appointmentsSignal.update(appointments =>
           appointments.filter(appointment => appointment.id !== id)
         );
-        console.log(`Cita #${id} eliminada correctamente.`);
+        showSuccess('Cita eliminada correctamente.');
       },
-      error: (err) => console.error('Error al eliminar la cita', err)
+      error: (err) => showError('No se pudo eliminar la cita.', err)
     });
   }
 
-  
-  updateAppointment(id: number, appointmentData: Partial<Appointment>): void {
+  updateAppointment(id: number, appointmentData: Partial<Appointment>, onSuccess?: () => void): void {
     this.http.put<Appointment>(`${this.apiUrl}${id}/`, appointmentData).subscribe({
       next: (updatedAppointment) => {
-        
-        
         this.appointmentsSignal.update(appointments =>
           appointments.map(a => a.id === id ? updatedAppointment : a)
         );
-        console.log(`Cita #${id} actualizada con éxito.`);
+        showSuccess('Cita actualizada correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al actualizar la cita en Django:', err)
+      error: (err) => showError('No se pudo actualizar la cita.', err)
     });
   }
 }

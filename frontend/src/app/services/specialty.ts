@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { showError, showSuccess } from './api-alert';
 
 export interface Specialty {
   id: number;
@@ -20,49 +20,46 @@ export class SpecialtiesService {
 
   specialtiesSignal = signal<Specialty[]>([]);
 
-  
   getSpecialties(): void {
     this.http.get<Specialty[]>(this.apiUrl).subscribe({
       next: (data) => this.specialtiesSignal.set(data),
-      error: (err) => console.error('Error de conexión:', err)
+      error: (err) => showError('No se pudieron cargar las especialidades.', err)
     });
   }
 
-  
-  createSpecialty(specialty: Partial<Specialty>): void {
+  createSpecialty(specialty: Partial<Specialty>, onSuccess?: () => void): void {
     this.http.post<Specialty>(this.apiUrl, specialty).subscribe({
       next: (newSpecialty) => {
-        
         this.specialtiesSignal.update(specialties => [...specialties, newSpecialty]);
+        showSuccess('Especialidad creada correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al guardar la especialidad en Django:', err)
+      error: (err) => showError('No se pudo crear la especialidad.', err)
     });
   }
 
-  
   deleteSpecialty(id: number): void {
     this.http.delete(`${this.apiUrl}${id}/`).subscribe({
-      next: ()=> {
+      next: () => {
         this.specialtiesSignal.update(specialties =>
           specialties.filter(specialty => specialty.id !== id)
         );
-        console.log( `Especialidad #${id} eliminada correctamnte.`);
+        showSuccess('Especialidad eliminada correctamente.');
       },
-      error: (err) => console.error('Error al eliminar la especialidad en Django', err)
+      error: (err) => showError('No se pudo eliminar la especialidad.', err)
     });
-
   }
 
-  
-  updateSpecialty(id: number, specialtyData: Partial<any>): void {
-    this.http.put<any>(`${this.apiUrl}${id}/`, specialtyData).subscribe({
+  updateSpecialty(id: number, specialtyData: Partial<Specialty>, onSuccess?: () => void): void {
+    this.http.put<Specialty>(`${this.apiUrl}${id}/`, specialtyData).subscribe({
       next: (updatedSpecialty) => {
         this.specialtiesSignal.update(specialties =>
           specialties.map(s => s.id === id ? updatedSpecialty : s)
         );
-        console.log(`Especialidad #${id} actualizada con éxito.`);
+        showSuccess('Especialidad actualizada correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al actualizar la especialidad en Django:', err)
+      error: (err) => showError('No se pudo actualizar la especialidad.', err)
     });
   }
 }

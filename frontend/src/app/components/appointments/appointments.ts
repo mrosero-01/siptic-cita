@@ -5,6 +5,7 @@ import { AppointmentService, Appointment } from '../../services/appointment';
 import { PatientsService } from '../../services/patient';
 import { SpecialtiesService } from '../../services/specialty';
 import { DoctorService } from '../../services/doctor'; 
+import { invalidFormAlert } from '../../services/api-alert';
 
 @Component({
   selector: 'app-appointments',
@@ -20,13 +21,10 @@ export class AppointmentsComponent implements OnInit {
   private doctorsService = inject(DoctorService);
   private fb = inject(FormBuilder);
 
-  
   public appointments = this.appointmentService.appointmentsSignal;
   public patients = this.patientsService.patientsSignal;
   public specialties = this.specialtiesService.specialtiesSignal;
   public doctors = this.doctorsService.doctorsSignal; 
-
-  
   public isModalOpen = signal<boolean>(false);
   public selectedAppointmentId = signal<number | null>(null); 
   public appointmentForm!: FormGroup;
@@ -49,12 +47,9 @@ export class AppointmentsComponent implements OnInit {
   }
 
   public openModal(): void {
-    
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors(); 
-
-    
     this.appointmentForm.reset({ status: 'PENDING', patient: '', specialty: '', doctor: '' });
     this.selectedAppointmentId.set(null); 
     this.isModalOpen.set(true);
@@ -65,16 +60,11 @@ export class AppointmentsComponent implements OnInit {
     this.selectedAppointmentId.set(null); 
   }
 
-  
   public onEditAppointment(appointment: Appointment): void {
     this.selectedAppointmentId.set(appointment.id); 
-
-    
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors();
-
-    
     this.appointmentForm.patchValue({
       patient: appointment.patient,         
       specialty: appointment.specialty,     
@@ -84,28 +74,41 @@ export class AppointmentsComponent implements OnInit {
       description: appointment.description,
       status: appointment.status            
     });
-
     this.isModalOpen.set(true);
   }
 
-  
-  public onSubmit(): void {
-    if (this.appointmentForm.valid) {
-      const idParaEditar = this.selectedAppointmentId();
+  private getInvalidFields(): string[] {
+    const labels: Record<string, string> = {
+      patient: 'Paciente',
+      specialty: 'Especialidad',
+      doctor: 'Médico',
+      date: 'Fecha',
+      start_time: 'Hora de inicio',
+      description: 'Motivo de la cita',
+      status: 'Estado'
+    };
 
-      if (idParaEditar !== null) {
-        
-        this.appointmentService.updateAppointment(idParaEditar, this.appointmentForm.value);
-      } else {
-        
-        this.appointmentService.createAppointment(this.appointmentForm.value);
-      }
-      
-      this.closeModal();
+    return Object.keys(this.appointmentForm.controls)
+      .filter(controlName => this.appointmentForm.get(controlName)?.invalid)
+      .map(controlName => labels[controlName] || controlName);
+  }
+
+  public onSubmit(): void {
+    if (this.appointmentForm.invalid) {
+      this.appointmentForm.markAllAsTouched();
+      invalidFormAlert(this.getInvalidFields());
+      return;
+    }
+
+    const idParaEditar = this.selectedAppointmentId();
+
+    if (idParaEditar !== null) {
+      this.appointmentService.updateAppointment(idParaEditar, this.appointmentForm.value, () => this.closeModal());
+    } else {
+      this.appointmentService.createAppointment(this.appointmentForm.value, () => this.closeModal());
     }
   }
 
-  
   public onDeleteAppointment(id: number): void {
     const confirmacion = confirm('¿Estás seguro de borrar la cita?');
     if (confirmacion) {

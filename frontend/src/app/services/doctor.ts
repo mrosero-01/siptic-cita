@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { showError, showSuccess } from './api-alert';
 
 export interface Doctor {
   id: number;
@@ -24,49 +25,46 @@ export class DoctorService {
 
   public doctorsSignal = signal<Doctor[]>([]);
 
-  
   getDoctors(): void {
     this.http.get<Doctor[]>(this.apiUrl).subscribe({
       next: (data) => this.doctorsSignal.set(data),
-      error: (err) => console.error('Error al traer los médicos de Django:', err)
+      error: (err) => showError('No se pudieron cargar los médicos.', err)
     });
   }
 
-  
-  createDoctor(doctor: Partial<Doctor>): void {
+  createDoctor(doctor: Partial<Doctor>, onSuccess?: () => void): void {
     this.http.post<Doctor>(this.apiUrl, doctor).subscribe({
       next: (newDoctor) => {
         this.doctorsSignal.update(doctors => [...doctors, newDoctor]);
+        showSuccess('Médico creado correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al guardar el médico en Django:', err.error)
+      error: (err) => showError('No se pudo crear el médico.', err)
     });
   }
 
-  
   deleteDoctor(id: number): void {
     this.http.delete(`${this.apiUrl}${id}/`).subscribe({
       next: () => {
         this.doctorsSignal.update(doctors => 
           doctors.filter(doctor => doctor.id !== id)
         );
-        console.log(`Doctor #${id} eliminado correctamente.`);
+        showSuccess('Médico eliminado correctamente.');
       },
-      error: (err) => console.error('Error al eliminar doctor:', err)
+      error: (err) => showError('No se pudo eliminar el médico.', err)
     });
   }
 
-  
-  updateDoctor(id: number, doctorData: Partial<Doctor>): void {
+  updateDoctor(id: number, doctorData: Partial<Doctor>, onSuccess?: () => void): void {
     this.http.put<Doctor>(`${this.apiUrl}${id}/`, doctorData).subscribe({
       next: (updatedDoctor) => {
-        
-        
         this.doctorsSignal.update(doctors =>
           doctors.map(d => d.id === id ? updatedDoctor : d)
         );
-        console.log(`Doctor #${id} actualizado con éxito.`);
+        showSuccess('Médico actualizado correctamente.');
+        onSuccess?.();
       },
-      error: (err) => console.error('Error al actualizar el médico en Django:', err)
+      error: (err) => showError('No se pudo actualizar el médico.', err)
     });
   }
 }

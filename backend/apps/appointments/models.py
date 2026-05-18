@@ -3,6 +3,7 @@ from apps.doctors.models import Specialty, Doctor
 from apps.patients.models import Patient
 from django.conf import settings
 
+
 STATUS = [
     ('PENDING', 'Pendiente'),
     ('CONFIRMED', 'Confirmada'),
@@ -10,9 +11,9 @@ STATUS = [
     ('RESCHEDULED', 'Reagendada'),
     ('ATTENDED', 'Atendida'),
     ('NO_SHOW', 'No asistió'),
-    
 ]
-# Create your models here.
+
+
 class Appointment(models.Model):
     patient = models.ForeignKey(
         Patient,
@@ -31,8 +32,8 @@ class Appointment(models.Model):
     )
     date = models.DateField()
     start_time = models.TimeField()
-    description = models.TextField(max_length=500,blank=True)
-    status = models.CharField(max_length=15,choices=STATUS,default='PENDING')
+    description = models.TextField(max_length=500, blank=True)
+    status = models.CharField(max_length=15, choices=STATUS, default='PENDING')
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -54,4 +55,3 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"Cita de {self.patient} con {self.doctor} - {self.date} {self.start_time}"
-
