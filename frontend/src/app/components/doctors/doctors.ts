@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DoctorService, Doctor } from '../../services/doctor'; 
@@ -18,6 +18,16 @@ export class DoctorsComponent implements OnInit {
   private fb = inject(FormBuilder);
   
   public doctors = this.doctorService.doctorsSignal;
+  public searchTerm = signal<string>('');
+  public filteredDoctors = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+
+    if (!term) {
+      return this.doctors();
+    }
+
+    return this.doctors().filter(doctor => doctor.n_document.toLowerCase().includes(term));
+  });
   public specialties = this.specialtiesService.specialtiesSignal;
   public isModalOpen = signal<boolean>(false);
   public selectedDoctorId = signal<number | null>(null); 
@@ -38,6 +48,10 @@ export class DoctorsComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       status: [true] 
     });
+  }
+
+  public onSearchChange(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   public openModal(): void {

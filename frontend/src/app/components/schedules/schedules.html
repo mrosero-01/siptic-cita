@@ -1,0 +1,153 @@
+<div class="view-container">
+  <div class="header">
+    <h2>Horarios Médicos</h2>
+  </div>
+
+  <div class="table-card schedule-panel">
+    <div class="table-toolbar">
+      <h3>Registrar disponibilidad</h3>
+    </div>
+
+    <form [formGroup]="scheduleForm" (ngSubmit)="createSchedule()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Especialidad</label>
+          <select formControlName="specialty">
+            <option value="" disabled selected>Seleccione especialidad...</option>
+            @for (specialty of specialties(); track specialty.id) {
+              <option [value]="specialty.id">{{ specialty.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Médico</label>
+          <select formControlName="doctor" [disabled]="selectedSpecialty() === null">
+            <option value="" disabled selected>Seleccione médico...</option>
+            @for (doctor of filteredDoctors(); track doctor.id) {
+              <option [value]="doctor.id">Dr(a). {{ doctor.first_name }} {{ doctor.last_name }}</option>
+            } @empty {
+              @if (selectedSpecialty() !== null) {
+                <option value="" disabled>No hay médicos para esta especialidad</option>
+              }
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha completa</label>
+          <input type="date" formControlName="date">
+        </div>
+
+        <div class="form-group">
+          <label>Hora inicial</label>
+          <input type="time" formControlName="start_time">
+        </div>
+
+        <div class="form-group">
+          <label>Hora final</label>
+          <input type="time" formControlName="end_time">
+        </div>
+      </div>
+
+      <div class="modal-actions compact-actions">
+        <button type="submit" class="btn-submit">Guardar Horario</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <h3>Disponibilidad por especialidad</h3>
+      <select class="search-input" [value]="selectedSpecialty() || ''" (change)="onSpecialtyFilterChange($event)">
+        <option value="" disabled>Filtrar especialidad...</option>
+        @for (specialty of specialties(); track specialty.id) {
+          <option [value]="specialty.id">{{ specialty.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="schedule-grid">
+      @for (schedule of filteredSchedules(); track schedule.id) {
+        <article class="schedule-card">
+          <div>
+            <h4>{{ schedule.doctor_name }}</h4>
+            <p>{{ schedule.specialty_name }}</p>
+          </div>
+          <div class="schedule-time">
+            <strong>{{ schedule.formatted_date }}</strong>
+            <span>{{ schedule.start_time }} - {{ schedule.end_time }}</span>
+          </div>
+          <div class="schedule-appointments">
+            <strong>Citas asignadas</strong>
+            @for (appointment of getScheduleAppointments(schedule); track appointment.id) {
+              <span>{{ appointment.start_time }} · {{ appointment.patient_name }}</span>
+            } @empty {
+              <span class="muted-text">Sin citas asignadas</span>
+            }
+          </div>
+          <div class="actions-wrapper">
+            <button class="btn-edit" type="button" (click)="openAppointmentModal(schedule)">Crear cita</button>
+            <button class="btn-delete" type="button" (click)="deleteSchedule(schedule.id)">Eliminar</button>
+          </div>
+        </article>
+      } @empty {
+        <div class="empty-schedules">
+          Seleccione una especialidad o registre disponibilidad para verla aquí.
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (isAppointmentModalOpen()) {
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Crear cita desde horario</h3>
+        <button class="btn-close" type="button" (click)="closeAppointmentModal()">✕</button>
+      </div>
+
+      <form [formGroup]="appointmentForm" (ngSubmit)="createAppointmentFromSchedule()">
+        <div class="schedule-summary">
+          <strong>{{ selectedSchedule()?.doctor_name }}</strong>
+          <span>{{ selectedSchedule()?.formatted_date }} · {{ selectedSchedule()?.start_time }} - {{ selectedSchedule()?.end_time }}</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Paciente</label>
+            <select formControlName="patient">
+              <option value="" disabled selected>Seleccione paciente...</option>
+              @for (patient of patients(); track patient.id) {
+                <option [value]="patient.id">{{ patient.first_name }} {{ patient.last_name }} ({{ patient.n_document }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Hora</label>
+            <select formControlName="start_time">
+              <option value="" disabled selected>Seleccione una hora dentro del rango...</option>
+              @for (time of selectedScheduleSlots(); track time) {
+                <option [value]="time">{{ time }}</option>
+              } @empty {
+                <option value="" disabled>No quedan horas libres en este horario</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Motivo</label>
+            <textarea formControlName="description" rows="3" placeholder="Motivo de la cita..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeAppointmentModal()">Cancelar</button>
+          <button type="submit" class="btn-submit">Crear Cita</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

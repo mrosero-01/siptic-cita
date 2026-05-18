@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PatientsService, Patient } from '../../services/patient'; 
@@ -16,8 +16,19 @@ export class PatientsComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   public patients = this.patientsService.patientsSignal;
+  public searchTerm = signal<string>('');
+  public filteredPatients = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+
+    if (!term) {
+      return this.patients();
+    }
+
+    return this.patients().filter(patient => patient.n_document.toLowerCase().includes(term));
+  });
   public isModalOpen = signal<boolean>(false);
   public selectedPatientId = signal<number | null>(null); 
+  public selectedClinicalHistory = signal<File | null>(null);
   public patientForm!: FormGroup;
 
   ngOnInit(): void {
@@ -38,8 +49,18 @@ export class PatientsComponent implements OnInit {
     });
   }
 
+  public onSearchChange(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  public onClinicalHistorySelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedClinicalHistory.set(input.files?.[0] || null);
+  }
+
   public openModal(): void {
     this.patientForm.reset({ document_type: 'CC', status: true });
+    this.selectedClinicalHistory.set(null);
     this.selectedPatientId.set(null); 
     this.isModalOpen.set(true);
   }
@@ -47,10 +68,12 @@ export class PatientsComponent implements OnInit {
   public closeModal(): void {
     this.isModalOpen.set(false);
     this.selectedPatientId.set(null); 
+    this.selectedClinicalHistory.set(null);
   }
 
   public OnEditPatient(patient: Patient): void {
     this.selectedPatientId.set(patient.id); 
+    this.selectedClinicalHistory.set(null);
     this.patientForm.patchValue({
       first_name: patient.first_name,
       last_name: patient.last_name,
@@ -79,6 +102,22 @@ export class PatientsComponent implements OnInit {
       .map(controlName => labels[controlName] || controlName);
   }
 
+  private buildPatientPayload(): FormData {
+    const payload = new FormData();
+    const value = this.patientForm.value;
+
+    Object.keys(value).forEach(key => {
+      payload.append(key, String(value[key] ?? ''));
+    });
+
+    const file = this.selectedClinicalHistory();
+    if (file) {
+      payload.append('clinical_history', file);
+    }
+
+    return payload;
+  }
+
   public onSubmit(): void {
     if (this.patientForm.invalid) {
       this.patientForm.markAllAsTouched();
@@ -86,12 +125,13 @@ export class PatientsComponent implements OnInit {
       return;
     }
 
+    const payload = this.buildPatientPayload();
     const idParaEditar = this.selectedPatientId();
 
     if (idParaEditar !== null) {
-      this.patientsService.updatePatient(idParaEditar, this.patientForm.value, () => this.closeModal());
+      this.patientsService.updatePatient(idParaEditar, payload, () => this.closeModal());
     } else {
-      this.patientsService.createPatient(this.patientForm.value, () => this.closeModal());
+      this.patientsService.createPatient(payload, () => this.closeModal());
     }
   }
 

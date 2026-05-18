@@ -1,9 +1,7 @@
 <div style="display: flex; width: 100vw; height: 100vh; overflow: hidden; font-family: system-ui, -apple-system, sans-serif;">
-  
   <app-sidebar (onMenuSelect)="changeView($event)"></app-sidebar>
 
-  <div style="flex: 1; height: 100vh; overflow-y: auto; background-color: #ffffff;">
-    
+  <div style="flex: 1; height: 100vh; overflow-y: auto; background-color: #f4f7fb;">
     @switch (currentView()) {
       @case ('citas') {
         <app-appointments></app-appointments>
@@ -17,6 +15,9 @@
       @case ('especialidades') {
         <app-specialties></app-specialties>
       }
+      @case ('horarios') {
+        <app-schedules></app-schedules>
+      }
       @default {
         <div style="padding: 40px; color: #495057; font-family: sans-serif;">
           <h2>Vista de {{ currentView() | uppercase }}</h2>
@@ -24,6 +25,7 @@
         </div>
       }
     }
-
   </div>
+
+  <app-ai-chat></app-ai-chat>
 </div>

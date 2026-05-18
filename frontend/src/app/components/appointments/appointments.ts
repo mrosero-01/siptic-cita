@@ -5,6 +5,7 @@ import { AppointmentService, Appointment } from '../../services/appointment';
 import { PatientsService } from '../../services/patient';
 import { SpecialtiesService } from '../../services/specialty';
 import { Doctor, DoctorService } from '../../services/doctor'; 
+import { ScheduleService } from '../../services/schedule';
 import { invalidFormAlert, showConfirm } from '../../services/api-alert';
 
 @Component({
@@ -19,13 +20,27 @@ export class AppointmentsComponent implements OnInit {
   private patientsService = inject(PatientsService);
   private specialtiesService = inject(SpecialtiesService);
   private doctorsService = inject(DoctorService);
+  private scheduleService = inject(ScheduleService);
   private fb = inject(FormBuilder);
 
   public appointments = this.appointmentService.appointmentsSignal;
+  public schedules = this.scheduleService.schedulesSignal;
+  public searchTerm = signal<string>('');
+  public filteredAppointments = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+
+    if (!term) {
+      return this.appointments();
+    }
+
+    return this.appointments().filter(appointment => appointment.doctor_name.toLowerCase().includes(term));
+  });
   public patients = this.patientsService.patientsSignal;
   public specialties = this.specialtiesService.specialtiesSignal;
   public doctors = this.doctorsService.doctorsSignal; 
   public selectedSpecialty = signal<number | null>(null);
+  public selectedDoctor = signal<number | null>(null);
+  public selectedDate = signal<string>('');
   public filteredDoctors = computed<Doctor[]>(() => {
     const specialtyId = this.selectedSpecialty();
     const doctors = this.doctors();
@@ -36,12 +51,27 @@ export class AppointmentsComponent implements OnInit {
 
     return doctors.filter(doctor => Number(doctor.specialty) === specialtyId);
   });
+  public availableTimes = computed(() => {
+    const doctorId = this.selectedDoctor();
+    const date = this.selectedDate();
+
+    if (doctorId === null || !date) {
+      return [];
+    }
+
+    return this.schedules()
+      .filter(schedule => schedule.status && Number(schedule.doctor) === doctorId && schedule.date === date)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time))
+      .flatMap(schedule => this.buildTimeSlots(schedule.start_time, schedule.end_time))
+      .filter(time => !this.isTimeOccupied(doctorId, date, time));
+  });
   public isModalOpen = signal<boolean>(false);
   public selectedAppointmentId = signal<number | null>(null); 
   public appointmentForm!: FormGroup;
 
   ngOnInit(): void {
     this.appointmentService.getAppointments();
+    this.scheduleService.getSchedules();
     this.initForm();
   }
 
@@ -66,14 +96,76 @@ export class AppointmentsComponent implements OnInit {
         this.appointmentForm.get('doctor')?.setValue('');
       }
     });
+
+    this.appointmentForm.get('doctor')?.valueChanges.subscribe(value => {
+      this.selectedDoctor.set(value ? Number(value) : null);
+      this.clearInvalidTime();
+    });
+
+    this.appointmentForm.get('date')?.valueChanges.subscribe(value => {
+      this.selectedDate.set(value || '');
+      this.clearInvalidTime();
+    });
+  }
+
+  private clearInvalidTime(): void {
+    const currentTime = this.appointmentForm.get('start_time')?.value;
+    const timeIsAvailable = this.availableTimes().some(time => time === currentTime);
+
+    if (currentTime && !timeIsAvailable) {
+      this.appointmentForm.get('start_time')?.setValue('');
+    }
+  }
+
+  private isTimeOccupied(doctorId: number, date: string, time: string): boolean {
+    return this.appointments().some(appointment =>
+      Number(appointment.doctor) === doctorId &&
+      appointment.date === date &&
+      this.normalizeTime(appointment.start_time) === this.normalizeTime(time)
+    );
+  }
+
+  private buildTimeSlots(start: string, end: string): string[] {
+    const slots: string[] = [];
+    let current = this.timeToMinutes(start);
+    const last = this.timeToMinutes(end);
+
+    while (current < last) {
+      slots.push(this.minutesToTime(current));
+      current += 30;
+    }
+
+    return slots;
+  }
+
+  private timeToMinutes(time: string): number {
+    const [hours, minutes] = this.normalizeTime(time).split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  private normalizeTime(time: string): string {
+    return time.slice(0, 5);
+  }
+
+  private minutesToTime(totalMinutes: number): string {
+    const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+    const minutes = (totalMinutes % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  public onSearchChange(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   public openModal(): void {
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors(); 
+    this.scheduleService.getSchedules();
     this.selectedSpecialty.set(null);
-    this.appointmentForm.reset({ status: 'PENDING', patient: '', specialty: '', doctor: '' });
+    this.selectedDoctor.set(null);
+    this.selectedDate.set('');
+    this.appointmentForm.reset({ status: 'PENDING', patient: '', specialty: '', doctor: '', date: '', start_time: '' });
     this.selectedAppointmentId.set(null); 
     this.isModalOpen.set(true);
   }
@@ -82,6 +174,8 @@ export class AppointmentsComponent implements OnInit {
     this.isModalOpen.set(false);
     this.selectedAppointmentId.set(null); 
     this.selectedSpecialty.set(null);
+    this.selectedDoctor.set(null);
+    this.selectedDate.set('');
   }
 
   public onEditAppointment(appointment: Appointment): void {
@@ -89,7 +183,10 @@ export class AppointmentsComponent implements OnInit {
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors();
+    this.scheduleService.getSchedules();
     this.selectedSpecialty.set(Number(appointment.specialty));
+    this.selectedDoctor.set(Number(appointment.doctor));
+    this.selectedDate.set(appointment.date);
     this.appointmentForm.patchValue({
       patient: appointment.patient,         
       specialty: appointment.specialty,     

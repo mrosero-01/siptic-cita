@@ -5,7 +5,10 @@
   </div>
 
   <div class="table-card">
-    <h3>Listado de Pacientes</h3>
+    <div class="table-toolbar">
+      <h3>Listado de Pacientes</h3>
+      <input class="search-input" type="search" placeholder="Buscar por documento..." (input)="onSearchChange($event)">
+    </div>
     <table>
       <thead>
         <tr>
@@ -15,11 +18,12 @@
           <th>Número identidad</th>
           <th>Teléfono</th>
           <th>Estado</th>
+          <th>Historia clínica</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (patient of patients(); track patient.id) {
+        @for (patient of filteredPatients(); track patient.id) {
           <tr>
             <td>#{{ patient.id }}</td>
             <td>{{ patient.first_name }} {{ patient.last_name }}</td>
@@ -30,6 +34,13 @@
               <span class="status-badge" [class.active]="patient.status" [class.inactive]="!patient.status">
                 {{ patient.status ? 'Activo' : 'Inactivo' }}
               </span>
+            </td>
+            <td>
+              @if (patient.clinical_history) {
+                <a class="file-link" [href]="patient.clinical_history" target="_blank">Ver archivo</a>
+              } @else {
+                <span class="muted-text">Sin archivo</span>
+              }
             </td>
             <td>
               <div class="actions-wrapper">
@@ -44,7 +55,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="7" class="empty-state">
+            <td colspan="8" class="empty-state">
               No hay pacientes registrados en el sistema.
             </td>
           </tr>
@@ -91,6 +102,10 @@
           <div class="form-group">
             <label>Fecha Nacimiento</label>
             <input type="date" formControlName="birth_date">
+          </div>
+          <div class="form-group full-width">
+            <label>Historia clínica</label>
+            <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onClinicalHistorySelected($event)">
           </div>
           <div class="form-group full-width">
             <label>Observaciones o Comentarios</label>

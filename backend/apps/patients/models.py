@@ -18,6 +18,7 @@ class Patient(models.Model):
     status = models.BooleanField(default=True)
     birth_date = models.DateField()
     comments = models.TextField(max_length=300, blank=True)
+    clinical_history = models.FileField(upload_to='clinical_histories/', blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

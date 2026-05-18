@@ -5,6 +5,8 @@ import { AppointmentsComponent } from './components/appointments/appointments';
 import { PatientsComponent } from './components/patients/patients';
 import { DoctorsComponent } from './components/doctors/doctors'; 
 import { SpecialtiesComponent } from './components/specialties/specialties';
+import { SchedulesComponent } from './components/schedules/schedules';
+import { AiChatComponent } from './components/ai-chat/ai-chat';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +17,8 @@ import { SpecialtiesComponent } from './components/specialties/specialties';
     PatientsComponent,
     DoctorsComponent, 
     SpecialtiesComponent,
+    SchedulesComponent,
+    AiChatComponent,
     UpperCasePipe 
   ],
   templateUrl: './app.html',

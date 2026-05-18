@@ -12,6 +12,7 @@ export interface Patient {
   status: boolean;
   birth_date: string;
   comments: string;
+  clinical_history: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,7 +33,7 @@ export class PatientsService {
     });
   }
 
-  createPatient(patient: Partial<Patient>, onSuccess?: () => void): void {
+  createPatient(patient: Partial<Patient> | FormData, onSuccess?: () => void): void {
     this.http.post<Patient>(this.apiUrl, patient).subscribe({
       next: (newPatient) => {
         this.patientsSignal.update(patients => [...patients, newPatient]);
@@ -55,7 +56,7 @@ export class PatientsService {
     });
   }
 
-  updatePatient(id: number, patientData: Partial<Patient>, onSuccess?: () => void): void {
+  updatePatient(id: number, patientData: Partial<Patient> | FormData, onSuccess?: () => void): void {
     this.http.put<Patient>(`${this.apiUrl}${id}/`, patientData).subscribe({
       next: (updatedPatient) => { 
         this.patientsSignal.update(patients =>
