@@ -1,0 +1,32 @@
+<button class="ai-fab" type="button" (click)="toggleChat()" aria-label="Abrir asistente de IA">
+  IA
+</button>
+
+@if (isOpen()) {
+  <section class="ai-panel">
+    <div class="ai-header">
+      <div>
+        <strong>MediBot</strong>
+        <span>Asistente de Siptic-Cita</span>
+      </div>
+      <button type="button" (click)="toggleChat()">✕</button>
+    </div>
+
+    <div class="ai-messages">
+      @for (message of messages(); track $index) {
+        <div class="ai-message" [class.user]="message.role === 'user'" [class.assistant]="message.role === 'assistant'">
+          {{ message.content }}
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="ai-message assistant loading">Pensando...</div>
+      }
+    </div>
+
+    <div class="ai-composer">
+      <textarea [value]="draft()" (input)="onDraftChange($event)" (keydown)="onKeyDown($event)" rows="2" placeholder="Pregúntame por la agenda, médicos o mensajes..."></textarea>
+      <button type="button" (click)="sendMessage()" [disabled]="isLoading() || !draft().trim()">Enviar</button>
+    </div>
+  </section>
+}

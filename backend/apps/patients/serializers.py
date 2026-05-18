@@ -14,6 +14,7 @@ class PatientSerializer(serializers.ModelSerializer):
             'status',
             'birth_date',
             'comments',
+            'clinical_history',
             'created_at',
             'updated_at',
         ]

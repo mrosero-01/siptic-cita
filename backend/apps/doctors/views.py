@@ -1,7 +1,7 @@
 from django.db.models import ProtectedError
 from rest_framework import serializers, viewsets
-from .models import Specialty, Doctor
-from .serializers import SpecialtySerializer, DoctorSerializer
+from .models import Specialty, Doctor, DoctorSchedule
+from .serializers import SpecialtySerializer, DoctorSerializer, DoctorScheduleSerializer
 
 
 class SpecialtyViewSet(viewsets.ModelViewSet):
@@ -28,3 +28,8 @@ class DoctorViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError({
                 'detail': 'No se puede eliminar este médico porque tiene citas asociadas.'
             })
+
+
+class DoctorScheduleViewSet(viewsets.ModelViewSet):
+    queryset = DoctorSchedule.objects.select_related('doctor', 'doctor__specialty').all()
+    serializer_class = DoctorScheduleSerializer

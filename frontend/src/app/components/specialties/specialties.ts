@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SpecialtiesService, Specialty } from '../../services/specialty';
@@ -16,6 +16,16 @@ export class SpecialtiesComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   specialtiesSignal = this.specialtiesService.specialtiesSignal;
+  public searchTerm = signal<string>('');
+  public filteredSpecialties = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+
+    if (!term) {
+      return this.specialtiesSignal();
+    }
+
+    return this.specialtiesSignal().filter(specialty => specialty.name.toLowerCase().includes(term));
+  });
   public isModalOpen = signal<boolean>(false);
   public selectedSpecialtyId = signal<number | null>(null); 
   public specialtyForm!: FormGroup;
@@ -31,6 +41,10 @@ export class SpecialtiesComponent implements OnInit {
       description: ['', [Validators.required]],
       status: [true]
     });
+  }
+
+  public onSearchChange(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   public openModal(): void {

@@ -5,7 +5,10 @@
   </div>
 
   <div class="table-card">
-    <h3>Listado de Citas</h3>
+    <div class="table-toolbar">
+      <h3>Listado de Citas</h3>
+      <input class="search-input" type="search" placeholder="Buscar por médico..." (input)="onSearchChange($event)">
+    </div>
     <table>
       <thead>
         <tr>
@@ -20,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (cita of appointments(); track cita.id) {
+        @for (cita of filteredAppointments(); track cita.id) {
           <tr>
             <td>#{{ cita.id }}</td>
             <td>{{ cita.patient_name || 'ID: ' + cita.patient }}</td>
@@ -114,7 +117,16 @@
 
           <div class="form-group">
             <label>Hora de Inicio</label>
-            <input type="time" formControlName="start_time">
+            <select formControlName="start_time" [disabled]="selectedDoctor() === null || !selectedDate()">
+              <option value="" disabled selected>{{ selectedDoctor() === null || !selectedDate() ? 'Seleccione médico y fecha primero...' : 'Seleccione un horario disponible...' }}</option>
+              @for (time of availableTimes(); track time) {
+                <option [value]="time">{{ time }}</option>
+              } @empty {
+                @if (selectedDoctor() !== null && selectedDate()) {
+                  <option value="" disabled>No hay horarios definidos para esta fecha</option>
+                }
+              }
+            </select>
           </div>
 
           @if (selectedAppointmentId() !== null) {

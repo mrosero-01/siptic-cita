@@ -5,7 +5,10 @@
   </div>
 
   <div class="table-card">
-    <h3>Listado de Médicos</h3>
+    <div class="table-toolbar">
+      <h3>Listado de Médicos</h3>
+      <input class="search-input" type="search" placeholder="Buscar por documento..." (input)="onSearchChange($event)">
+    </div>
     <table>
       <thead>
         <tr>
@@ -20,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (doctor of doctors(); track doctor.id) {
+        @for (doctor of filteredDoctors(); track doctor.id) {
           <tr>
             <td>#{{ doctor.id }}</td>
             <td>Dr(a). {{ doctor.first_name }} {{ doctor.last_name }}</td>
