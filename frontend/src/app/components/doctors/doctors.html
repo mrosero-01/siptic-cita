@@ -11,6 +11,7 @@
         <tr>
           <th>ID</th>
           <th>Nombre Completo</th>
+          <th>Documento</th>
           <th>Email</th>
           <th>Teléfono</th>
           <th>Especialidad</th>
@@ -23,7 +24,7 @@
           <tr>
             <td>#{{ doctor.id }}</td>
             <td>Dr(a). {{ doctor.first_name }} {{ doctor.last_name }}</td>
-            <td>{{ doctor.license_number }}</td>
+            <td>{{ doctor.n_document }}</td>
             <td>{{ doctor.email }}</td>
             <td>{{ doctor.phone }}</td>
             <td>{{ doctor.specialty_name || 'ID: ' + doctor.specialty }}</td>
@@ -85,10 +86,9 @@
               }
             </select>
           </div>
-          
           <div class="form-group">
-            <label>Tarjeta Profesional / Reg.</label>
-            <input type="text" formControlName="license_number" placeholder="No. Registro médico">
+            <label>Documento</label>
+            <input type="text" formControlName="n_document" placeholder="Número de documento">
           </div>
 
           <div class="form-group">

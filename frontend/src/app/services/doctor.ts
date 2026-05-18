@@ -7,7 +7,7 @@ export interface Doctor {
   last_name: string;
   specialty: number;          
   specialty_name?: string;     
-  license_number: string;
+  n_document: string;
   phone: string;
   email: string;
   status: boolean;
@@ -38,7 +38,7 @@ export class DoctorService {
       next: (newDoctor) => {
         this.doctorsSignal.update(doctors => [...doctors, newDoctor]);
       },
-      error: (err) => console.error('Error al guardar el médico en Django:', err)
+      error: (err) => console.error('Error al guardar el médico en Django:', err.error)
     });
   }
 

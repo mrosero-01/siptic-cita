@@ -35,7 +35,7 @@ export class DoctorsComponent implements OnInit {
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
       specialty: ['', [Validators.required]], 
-      license_number: ['', [Validators.required]],
+      n_document: ['', [Validators.required]],
       phone: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       status: [true] 
@@ -66,7 +66,7 @@ export class DoctorsComponent implements OnInit {
       first_name: doctor.first_name,
       last_name: doctor.last_name,
       specialty: doctor.specialty, 
-      license_number: doctor.license_number,
+      n_document: doctor.n_document,
       phone: doctor.phone,
       email: doctor.email,
       status: doctor.status
