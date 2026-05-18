@@ -1,11 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AppointmentService, Appointment } from '../../services/appointment'; 
 import { PatientsService } from '../../services/patient';
 import { SpecialtiesService } from '../../services/specialty';
-import { DoctorService } from '../../services/doctor'; 
-import { invalidFormAlert } from '../../services/api-alert';
+import { Doctor, DoctorService } from '../../services/doctor'; 
+import { invalidFormAlert, showConfirm } from '../../services/api-alert';
 
 @Component({
   selector: 'app-appointments',
@@ -25,6 +25,17 @@ export class AppointmentsComponent implements OnInit {
   public patients = this.patientsService.patientsSignal;
   public specialties = this.specialtiesService.specialtiesSignal;
   public doctors = this.doctorsService.doctorsSignal; 
+  public selectedSpecialty = signal<number | null>(null);
+  public filteredDoctors = computed<Doctor[]>(() => {
+    const specialtyId = this.selectedSpecialty();
+    const doctors = this.doctors();
+
+    if (specialtyId === null) {
+      return [];
+    }
+
+    return doctors.filter(doctor => Number(doctor.specialty) === specialtyId);
+  });
   public isModalOpen = signal<boolean>(false);
   public selectedAppointmentId = signal<number | null>(null); 
   public appointmentForm!: FormGroup;
@@ -44,12 +55,24 @@ export class AppointmentsComponent implements OnInit {
       description: ['', [Validators.required]],
       status: ['PENDING', [Validators.required]] 
     });
+
+    this.appointmentForm.get('specialty')?.valueChanges.subscribe(value => {
+      const specialtyId = value ? Number(value) : null;
+      this.selectedSpecialty.set(specialtyId);
+      const selectedDoctor = Number(this.appointmentForm.get('doctor')?.value);
+      const doctorBelongsToSpecialty = this.doctors().some(doctor => doctor.id === selectedDoctor && Number(doctor.specialty) === specialtyId);
+
+      if (!doctorBelongsToSpecialty) {
+        this.appointmentForm.get('doctor')?.setValue('');
+      }
+    });
   }
 
   public openModal(): void {
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors(); 
+    this.selectedSpecialty.set(null);
     this.appointmentForm.reset({ status: 'PENDING', patient: '', specialty: '', doctor: '' });
     this.selectedAppointmentId.set(null); 
     this.isModalOpen.set(true);
@@ -58,6 +81,7 @@ export class AppointmentsComponent implements OnInit {
   public closeModal(): void {
     this.isModalOpen.set(false);
     this.selectedAppointmentId.set(null); 
+    this.selectedSpecialty.set(null);
   }
 
   public onEditAppointment(appointment: Appointment): void {
@@ -65,6 +89,7 @@ export class AppointmentsComponent implements OnInit {
     this.patientsService.getPatients();
     this.specialtiesService.getSpecialties();
     this.doctorsService.getDoctors();
+    this.selectedSpecialty.set(Number(appointment.specialty));
     this.appointmentForm.patchValue({
       patient: appointment.patient,         
       specialty: appointment.specialty,     
@@ -110,9 +135,6 @@ export class AppointmentsComponent implements OnInit {
   }
 
   public onDeleteAppointment(id: number): void {
-    const confirmacion = confirm('¿Estás seguro de borrar la cita?');
-    if (confirmacion) {
-      this.appointmentService.deleteAppointment(id);
-    }
+    showConfirm('¿Estás seguro de borrar la cita?', () => this.appointmentService.deleteAppointment(id));
   }
 }

@@ -95,10 +95,14 @@
 
           <div class="form-group">
             <label>Médico</label>
-            <select formControlName="doctor">
-              <option value="" disabled selected>Seleccione un médico...</option>
-              @for (d of doctors(); track d.id) {
+            <select formControlName="doctor" [disabled]="selectedSpecialty() === null">
+              <option value="" disabled selected>{{ selectedSpecialty() === null ? 'Seleccione una especialidad primero...' : 'Seleccione un médico...' }}</option>
+              @for (d of filteredDoctors(); track d.id) {
                 <option [value]="d.id">Dr(a). {{ d.first_name }} {{ d.last_name }}</option>
+              } @empty {
+                @if (selectedSpecialty() !== null) {
+                  <option value="" disabled>No hay médicos para esta especialidad</option>
+                }
               }
             </select>
           </div>
