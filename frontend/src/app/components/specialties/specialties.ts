@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { SpecialtiesService } from '../../services/specialty';
+import { SpecialtiesService, Specialty } from '../../services/specialty';
+import { invalidFormAlert } from '../../services/api-alert';
 
 @Component({
   selector: 'app-specialties',
@@ -15,8 +16,6 @@ export class SpecialtiesComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   specialtiesSignal = this.specialtiesService.specialtiesSignal;
-
- 
   public isModalOpen = signal<boolean>(false);
   public selectedSpecialtyId = signal<number | null>(null); 
   public specialtyForm!: FormGroup;
@@ -35,7 +34,6 @@ export class SpecialtiesComponent implements OnInit {
   }
 
   public openModal(): void {
-
     this.specialtyForm.reset({ status: true });
     this.selectedSpecialtyId.set(null); 
     this.isModalOpen.set(true);
@@ -46,7 +44,7 @@ export class SpecialtiesComponent implements OnInit {
     this.selectedSpecialtyId.set(null); 
   }
 
-  public onEditSpecialty(specialty: any): void {
+  public onEditSpecialty(specialty: Specialty): void {
     this.selectedSpecialtyId.set(specialty.id);
     this.specialtyForm.patchValue({
       name: specialty.name,
@@ -56,17 +54,30 @@ export class SpecialtiesComponent implements OnInit {
     this.isModalOpen.set(true);
   }
 
+  private getInvalidFields(): string[] {
+    const labels: Record<string, string> = {
+      name: 'Nombre de la especialidad',
+      description: 'Descripción'
+    };
+
+    return Object.keys(this.specialtyForm.controls)
+      .filter(controlName => this.specialtyForm.get(controlName)?.invalid)
+      .map(controlName => labels[controlName] || controlName);
+  }
+
   public onSubmit(): void {
-    if (this.specialtyForm.valid) {
-      const idParaEditar = this.selectedSpecialtyId();
+    if (this.specialtyForm.invalid) {
+      this.specialtyForm.markAllAsTouched();
+      invalidFormAlert(this.getInvalidFields());
+      return;
+    }
 
-      if (idParaEditar !== null) {
-        this.specialtiesService.updateSpecialty(idParaEditar, this.specialtyForm.value);
-      } else {
-        this.specialtiesService.createSpecialty(this.specialtyForm.value);
-      }
+    const idParaEditar = this.selectedSpecialtyId();
 
-      this.closeModal();
+    if (idParaEditar !== null) {
+      this.specialtiesService.updateSpecialty(idParaEditar, this.specialtyForm.value, () => this.closeModal());
+    } else {
+      this.specialtiesService.createSpecialty(this.specialtyForm.value, () => this.closeModal());
     }
   }
 

@@ -27,7 +27,7 @@
             <td>{{ doctor.n_document }}</td>
             <td>{{ doctor.email }}</td>
             <td>{{ doctor.phone }}</td>
-            <td>{{ doctor.specialty_name || 'ID: ' + doctor.specialty }}</td>
+            <td>{{ doctor.specialty_name }}</td>
             <td>
               <span class="status-badge" [class.active]="doctor.status" [class.inactive]="!doctor.status">
                 {{ doctor.status ? 'Activo' : 'Inactivo' }}
